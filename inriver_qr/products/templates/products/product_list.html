@@ -1,0 +1,150 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <title>Список товаров</title>
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'products/styles.css' %}">
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+  <script>
+    function toggleSelectAll(source) {
+      const checkboxes = document.getElementsByName('products');
+      for (let checkbox of checkboxes) {
+        checkbox.checked = source.checked;
+      }
+    }
+  </script>
+</head>
+
+{% load dict_get %}
+{% load custom_filters %}
+
+{% if returntolist  %}
+  <a href="{% url 'product_list' %}" class="button">← Вернуться к списку товаров</a>
+{% endif %}
+
+<form method="post" action="{% url 'update_from_inriver' %}" id="update-form" style="display:inline;">
+  {% csrf_token %}
+  
+  <button type="submit" class="button" id="update-button">🔄 Обновить из Inriver</button>
+  <div id="loading-spinner" style="display: none; margin-left: 10px;">
+    <div class="spinner"></div>
+  </div>
+
+  {% if has_qr_codes %}
+  <a href="{% url 'download_all_qr' %}" class="button">📦 Скачать все QR-коды (ZIP) </a>
+
+  <a href="{% url 'delete_all_qr' %}" class="button" onclick="return confirm('Удалить все QR-коды?')">🗑 Удалить все QR-коды</a>
+
+  {% endif %}
+
+
+</form>
+
+{% if messages %}
+  <div class="mt-2">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+
+<form method="get">
+    {{ filter.form.as_p }}
+    <button type="submit">Фильтр</button>
+</form>
+
+<form method="post" action="{% url 'generate_qr' %}">
+  
+  {% csrf_token %}
+
+  {% if show_download_all %}
+
+    <p>
+      ✅ QR-коды сгенерированы.
+      <a href="{% url 'download_all_qr' %}">
+        📦 Скачать все как архив
+      </a>
+    </p>
+  {% endif %}
+  
+
+  <h3>Параметры QR</h3>
+  <label><input type="checkbox" name="include_barcode"  checked> Включить штрих-код</label><br><br>
+  <button type="submit" class="button">📎 Сформировать QR коды</button>
+
+
+  <table>
+    <thead>
+      <tr>
+        <th><input type="checkbox" onclick="toggleSelectAll(this)"> Все</th>
+        <th>Название</th>
+        <th>Штрих-код</th>
+        <th>Группа</th>
+        <th>Дата создания</th>
+        <th>Показывать</th>
+        <th>QR код</th>
+      </tr>
+    </thead>
+    <tbody>
+  {% for product in page_obj %}
+  <tr>
+    <td><input type="checkbox" name="products" value="{{ product.id }}"></td>
+    <td>{{ product.name }}</td>
+    <td>{{ product.barcode }}</td>
+    <td>{{ product.group }}</td>
+    <td>{{ product.created_at }}</td>
+    <td>{{ product.show_on_site }}</td>
+    <td>
+  {% with  "qrcodes/"|add:product.name|add:".png" as png_path  %}
+    {% if png_path|file_exists %}
+      <a href="{% url 'download_qr' product.id %}" class="btn btn-sm btn-success">
+        📥 Скачать QR
+      </a>
+    {% else %}
+      <span class="text-muted">QR не сгенерирован</span>
+    {% endif %}
+  {% endwith %}
+</td>
+
+  </tr>
+  {% endfor %}
+</tbody>
+<div style="margin-top: 20px;">
+  <div>
+    {% if page_obj.has_previous %}
+      <a href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">⏪ Первая</a>
+      <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">◀️ Назад</a>
+    {% endif %}
+
+    <span>Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+
+    {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">Вперёд ▶️</a>
+      <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">Последняя ⏩</a>
+    {% endif %}
+  </div>
+</div>
+
+  </table>
+
+</form>
+
+<script>
+  const form = document.getElementById("update-form");
+  const button = document.getElementById("update-button");
+  const spinner = document.getElementById("loading-spinner");
+
+  form.addEventListener("submit", function () {
+    button.disabled = true;
+    spinner.style.display = "inline-block";
+    button.innerText = "Загрузка...";
+  });
+</script>
+
+</html>
