@@ -28,7 +28,18 @@ SECRET_KEY = 'django-insecure-1h*)c7lpkcf$qcs)=-v73gl2=ehto^0^x@&tlxnxkr5v_lw(m)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
+
+CSRF_TRUSTED_ORIGINS = ['http://.*', 
+                        
+                        'https://agenda.sepkoeriers.nl',
+                        'http://agenda.sepkoeriers.nl',
+                        'https://agenda.sepkoeriers.nl/accounts/profile/',
+                        'http://127.0.0.1:8000',
+                        'http://0.0.0.0:8000',
+                        'http://34.171.209.171',
+                        'http://34.28.93.1',
+                        ]
 SECRET_KEY = 'django-insecure-_q9&b%395)=(pebed(8ci_vnk6!&s7@ultw3hcgc8^0%b%s1=*'
 
 # Application definition
