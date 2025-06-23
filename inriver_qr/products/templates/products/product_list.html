@@ -21,17 +21,36 @@
   <link rel="stylesheet" href="{% static 'products/styles.css' %}">
   <link rel="stylesheet" href="{% static 'css/styles.css' %}">
   <script>
-    function toggleSelectAll(source) {
-      const checkboxes = document.getElementsByName('products');
-      for (let checkbox of checkboxes) {
-        checkbox.checked = source.checked;
-      }
-    }
+    
   </script>
 </head>
 
+
 {% load dict_get %}
 {% load custom_filters %}
+
+
+
+<form method="get" class="filter-form" style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+  {% for field in filter.form %}
+    <div style="display: flex; align-items: center;">
+      <label class="filter-label" for="{{ field.id_for_label }}" style="margin-right: 4px;">{{ field.label }}:</label>
+      {{ field|add_class:"filter-input" }}
+    </div>
+  {% endfor %}
+
+  <button type="submit" class="filter-button">🔍 Filter</button>
+
+  <!-- Кнопка "показать товары без QR-кодов" -->
+  <input type="hidden" name="without_qr" value="{% if not show_without_qr %}1{% else %}0{% endif %}">
+  <button type="submit" name="toggle_qr_filter" value="1" class="button">
+    {% if not show_without_qr %}
+      🔍 Show products without QR codes
+    {% else %}
+      🔄 Show all products
+    {% endif %}
+  </button>
+</form>
 
 {% if returntolist  %}
   <a href="{% url 'product_list' %}" class="button">← Return to the list of products</a>
@@ -85,22 +104,17 @@
 
 
 
-<form method="get" class="filter-form">
-  {% for field in filter.form %}
-    <div style="display: flex; align-items: center;">
-      <label class="filter-label" for="{{ field.id_for_label }}">Name:</label>
-      {{ field|add_class:"filter-input" }}
-    </div>
-  {% endfor %}
 
-  <button type="submit" class="filter-button">🔍 Filter</button>
-</form>
 
-</form>
+
 
 <form method="post" action="{% url 'generate_qr' %}" id="generateqgr-form">
   
+  
   {% csrf_token %}
+
+  <input type="hidden" name="select_all" id="select_all_flag" value="0">
+
 
   {% if show_download_all %}
 
@@ -113,7 +127,7 @@
   {% endif %}
   
   <div style="display: flex; flex-direction: row; align-items: center; gap: 20px; flex-wrap: wrap;">
-  <button type="submit" class="button" id="generateqgr-button">📎 Generate QR codes</button>
+  <button type="submit" class="button  top-margin" id="generateqgr-button">📎 Generate QR codes</button>
   <div id="generateqgr-spinner" style="display: none; margin-left: 10px;">
     <div class="spinner"></div>
   </div>
@@ -166,14 +180,14 @@
   </tr>
   {% endfor %}
 </tbody>
-<div style="margin-top: 20px;">
+<div class="pagination">
   <div>
     {% if page_obj.has_previous %}
-      <a href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">⏪ first </a>
+      <a href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">⏪ First </a>
       <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">◀️ Back</a>
     {% endif %}
 
-    <span>Page {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+    <span>Page {{ page_obj.number }} from {{ page_obj.paginator.num_pages }}</span>
 
     {% if page_obj.has_next %}
       <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">Next ▶️</a>
@@ -206,9 +220,21 @@
     generateqgrspinner.style.display = "inline-block";
     generateqgrbutton.innerText = "QR codes are being generated...";
   });
+  function toggleSelectAll(source) {
+      const checkboxes = document.getElementsByName('products');
+      for (let checkbox of checkboxes) {
+        checkbox.checked = source.checked;
+      }
+      document.getElementById("select_all_flag").value = "1";
+      if (source.checked) {
+        alert("ALL products on this page will be selected");
+      } else {
+        alert("Selection cleared");
+      }
+    }
+  
 
-  
-  
+    
 </script>
 
 </html>

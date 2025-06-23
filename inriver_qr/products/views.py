@@ -25,8 +25,10 @@ from zipfile import ZipFile
 TEMP_QR_DIR = os.path.join(tempfile.gettempdir(), 'qr_codes')
 os.makedirs(TEMP_QR_DIR, exist_ok=True)
 
-def product_list(request):
+def product_list_old(request):
+    
     product_filter = ProductFilter(request.GET, queryset=Product.objects.all().order_by('-name'))
+    
 
     # Пагинация
     paginator = Paginator(product_filter.qs, 20)  # 20 товаров на страницу
@@ -44,6 +46,41 @@ def product_list(request):
         'show_download_all': False,
         'has_qr_codes': has_qr_codes,
     })
+
+from django.db.models import Q
+
+def product_list(request):
+    show_without_qr = request.GET.get("without_qr") == "1"
+    base_qs = Product.objects.all().order_by('-name')
+
+    if show_without_qr:
+        # Получаем ID товаров без QR
+        ids_without_qr = []
+        for product in base_qs:
+            qr_path = os.path.join(settings.MEDIA_ROOT, 'qrcodes',  f"{product.name}.png")
+            if not os.path.exists(qr_path):
+                ids_without_qr.append(product.id)
+
+        base_qs = base_qs.filter(id__in=ids_without_qr)  # ✅ это снова QuerySet
+
+    product_filter = ProductFilter(request.GET, queryset=base_qs)
+
+    paginator = Paginator(product_filter.qs, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    qr_dir = os.path.join(settings.MEDIA_ROOT, 'qrcodes')
+    has_qr_codes = any(os.scandir(qr_dir)) if os.path.exists(qr_dir) else False
+
+    return render(request, 'products/product_list.html', {
+        'filter': product_filter,
+        'page_obj': page_obj,
+        'qr_files': {},
+        'show_download_all': False,
+        'has_qr_codes': has_qr_codes,
+        'show_without_qr': show_without_qr,
+    })
+
 
 
 def delete_all_qr(request):
@@ -94,14 +131,24 @@ def generate_qr_old(request):
 def generate_qr(request):
     if request.method == 'POST':
         selected_ids = request.POST.getlist('products')
+        
+        select_all = request.POST.get("select_all") == "1"
+        
+        
         include_barcode = 'include_barcode' in request.POST
+        print(select_all)
 
         if not selected_ids:
             return render(request, 'products/generate_qr.html', {'returntolist': True})
             
             #return HttpResponse("Не выбраны товары.", status=400)
-
-        products = Product.objects.filter(id__in=selected_ids)
+        if select_all:
+            # Выбрать ВСЕ товары с учётом фильтра (не только текущую страницу)
+            product_filter = ProductFilter(request.session.get("last_filter", {}), queryset=Product.objects.all())
+            products = product_filter.qs
+        else:
+            products = Product.objects.filter(id__in=selected_ids)
+            
         file_paths = []
         qr_root = os.path.join(settings.MEDIA_ROOT, 'qrcodes')
         os.makedirs(qr_root, exist_ok=True)
