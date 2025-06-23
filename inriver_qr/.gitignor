@@ -6,6 +6,5 @@ db.sqlite3
 notes
 *.ppk
 pub_putty_key
-/static/
 __pycache__/
 migrations
