@@ -166,6 +166,7 @@ def download_all_qr(request):
             fpath = os.path.join(settings.MEDIA_ROOT, 'qrcodes', fname)
             zipf.write(fpath, arcname=fname)
     zip_buffer.seek(0)
+    
     return HttpResponse(zip_buffer, content_type='application/zip', headers={
         'Content-Disposition': 'attachment; filename="qr_codes.zip"',
     })
@@ -181,7 +182,6 @@ def check_url_exists(url):
 
 def remove_transparency(im, bg_color=(255, 255, 255)):
     """
-    Taken from https://stackoverflow.com/a/35859141/7444782
     """
     # Only process if image has transparency (http://stackoverflow.com/a/1963146)
     if im.mode in ('RGBA', 'LA') or (im.mode == 'P' and 'transparency' in im.info):
