@@ -62,7 +62,7 @@
 <form method="post" action="{% url 'delete_all_qr' %}" id="update-form" style="display:inline;">
   {% csrf_token %}
   
-  <button type="submit" class="button top-margin" id="update-button" onclick="return confirm('Удалить все QR-коды?')">🗑 Delete all QR codes</button>
+  <button type="submit" class="button top-margin" id="update-button" onclick="return confirm('Delete all QR codes?')">🗑 Delete all QR codes</button>
   <div id="loading-spinner" style="display: none; margin-left: 10px;">
     <div class="spinner"></div>
   </div>
