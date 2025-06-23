@@ -103,6 +103,8 @@ def generate_qr(request):
 
         products = Product.objects.filter(id__in=selected_ids)
         file_paths = []
+        qr_root = os.path.join(settings.MEDIA_ROOT, 'qrcodes')
+        os.makedirs(qr_root, exist_ok=True)
 
         for product in products:
             qr_text = f"{product.name}"
