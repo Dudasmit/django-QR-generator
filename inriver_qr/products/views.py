@@ -206,7 +206,7 @@ def create_and_save_qr_code_eps(url, item, GTIN,include_barcode, folder):
         print("Ссылка существует!")
     else:
         print("Ссылка не доступна или не существует. " + item)
-        return False
+        #return False
     if include_barcode:
         # Добавляем штрих-код в данные QR-кода
         data = "01" + str(GTIN) + "8200" + data_url
