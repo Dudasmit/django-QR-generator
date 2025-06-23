@@ -52,9 +52,9 @@ def delete_all_qr(request):
     if os.path.exists(qr_dir):
         shutil.rmtree(qr_dir)
         os.makedirs(qr_dir)  # Создаём заново пустую папку, если нужно
-        messages.success(request, "Все QR-коды успешно удалены.")
+        messages.success(request, "All QR codes have been successfully removed.")
     else:
-        messages.info(request, "Файлы для удаления не найдены.")
+        messages.info(request, "No files were found for deletion.")
 
     return redirect('product_list')  # Возврат на главную
 
