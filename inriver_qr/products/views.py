@@ -324,6 +324,6 @@ def update_products_from_inriver(request):
 
     messages.success(
         request,
-        f"Обновление завершено: {created_count} добавлено, {updated_count} обновлено, {skipped_count} пропущено (дубликаты)."
+        f"The update has been finalized: {created_count} added, {updated_count} updated, {skipped_count} missing (duplicates)."
     )
     return redirect('product_list')
