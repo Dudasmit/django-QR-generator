@@ -99,7 +99,7 @@ def generate_qr(request):
         if not selected_ids:
             return render(request, 'products/generate_qr.html', {'returntolist': True})
             
-            return HttpResponse("Не выбраны товары.", status=400)
+            #return HttpResponse("Не выбраны товары.", status=400)
 
         products = Product.objects.filter(id__in=selected_ids)
         file_paths = []
@@ -117,7 +117,7 @@ def generate_qr(request):
             
             #img.save(file_path)
             
-            if create_and_save_qr_code_eps("https://www.esschertdesign.com/qr/", product.name, product.barcode, "qrcodes"):
+            if create_and_save_qr_code_eps("https://www.esschertdesign.com/qr/", product.name, product.barcode,include_barcode, "qrcodes"):
                 file_paths.append((product.id, filename))
             #print(file_paths)
 
@@ -197,7 +197,7 @@ def remove_transparency(im, bg_color=(255, 255, 255)):
         return im
 
 
-def create_and_save_qr_code_eps(url, item, GTIN, folder):
+def create_and_save_qr_code_eps(url, item, GTIN,include_barcode, folder):
     data_url = url +  item
 
     if check_url_exists(data_url):
@@ -205,7 +205,11 @@ def create_and_save_qr_code_eps(url, item, GTIN, folder):
     else:
         print("Ссылка не доступна или не существует. " + item)
         return False
-    data = "01" + str(GTIN) + "8200" + data_url
+    if include_barcode:
+        # Добавляем штрих-код в данные QR-кода
+        data = "01" + str(GTIN) + "8200" + data_url
+    else:
+        data =  data_url
 
     # Создание QR-кода
     qr = qrcode.QRCode(

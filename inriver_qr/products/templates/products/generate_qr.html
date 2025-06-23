@@ -17,15 +17,15 @@
   </script>
 </head>
 {% if returntolist  %}
-<h3>Не выбраны товары.</h3>
-  <a href="{% url 'product_list' %}" class="button">← Вернуться к списку товаров</a>
+<h3>Items not selected.</h3>
+  <a href="{% url 'product_list' %}" class="button">← Back to product list</a>
 {% endif %}
 
 {% if not returntolist  %}
 <form method="post">
   {% csrf_token %}
   {{ form.as_p }}
-  <button type="submit" class="button" >Сформировать QR-коды</button>
+  <button type="submit" class="button" >Generate QR codes</button>
   {% for product in products %}
     <div>
       <input type="checkbox" name="product_ids" value="{{ product.id }}">

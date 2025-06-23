@@ -24,26 +24,44 @@
 {% load custom_filters %}
 
 {% if returntolist  %}
-  <a href="{% url 'product_list' %}" class="button">← Вернуться к списку товаров</a>
+  <a href="{% url 'product_list' %}" class="button">← Return to the list of products</a>
 {% endif %}
 
 <form method="post" action="{% url 'update_from_inriver' %}" id="update-form" style="display:inline;">
   {% csrf_token %}
   
-  <button type="submit" class="button" id="update-button">🔄 Обновить из Inriver</button>
+  <button type="submit" class="button" id="update-button">🔄 Update from Inriver</button>
   <div id="loading-spinner" style="display: none; margin-left: 10px;">
     <div class="spinner"></div>
   </div>
+</form>
 
   {% if has_qr_codes %}
-  <a href="{% url 'download_all_qr' %}" class="button">📦 Скачать все QR-коды (ZIP) </a>
+  <form method="post" action="{% url 'download_all_qr' %}" id="update-form" style="display:inline;">
+  {% csrf_token %}
+  
+  <button type="submit" class="button" id="update-button">📦 Download all QR codes (ZIP)</button>
+  <div id="loading-spinner" style="display: none; margin-left: 10px;">
+    <div class="spinner"></div>
+  </div>
+</form>
+<form method="post" action="{% url 'delete_all_qr' %}" id="update-form" style="display:inline;">
+  {% csrf_token %}
+  
+  <button type="submit" class="button" id="update-button" onclick="return confirm('Удалить все QR-коды?')">🗑 Delete all QR codes</button>
+  <div id="loading-spinner" style="display: none; margin-left: 10px;">
+    <div class="spinner"></div>
+  </div>
+</form>
 
-  <a href="{% url 'delete_all_qr' %}" class="button" onclick="return confirm('Удалить все QR-коды?')">🗑 Удалить все QR-коды</a>
+  <!--<a href="{% url 'download_all_qr' %}" class="button" >📦 Скачать все QR-коды (ZIP) </a>
+
+  <a href="{% url 'delete_all_qr' %}" class="button" onclick="return confirm('Удалить все QR-коды?')">🗑 Удалить все QR-коды</a>-->
 
   {% endif %}
 
 
-</form>
+
 
 {% if messages %}
   <div class="mt-2">
@@ -56,7 +74,7 @@
 
 <form method="get">
     {{ filter.form.as_p }}
-    <button type="submit">Фильтр</button>
+    <button type="submit">Filter</button>
 </form>
 
 <form method="post" action="{% url 'generate_qr' %}">
@@ -66,28 +84,28 @@
   {% if show_download_all %}
 
     <p>
-      ✅ QR-коды сгенерированы.
-      <a href="{% url 'download_all_qr' %}">
-        📦 Скачать все как архив
+      ✅ QR codes generated.
+      <a href="{% url 'download_all_qr' %}" id="update-button" >
+        📦 Download everything as an archive
       </a>
     </p>
   {% endif %}
   
 
-  <h3>Параметры QR</h3>
-  <label><input type="checkbox" name="include_barcode"  checked> Включить штрих-код</label><br><br>
-  <button type="submit" class="button">📎 Сформировать QR коды</button>
+  <h3>QR Parameters</h3>
+  <label><input type="checkbox" name="include_barcode"  checked> ADD barcode</label><br><br>
+  <button type="submit" class="button">📎 Generate QR codes</button>
 
 
   <table>
     <thead>
       <tr>
         <th><input type="checkbox" onclick="toggleSelectAll(this)"> Все</th>
-        <th>Название</th>
-        <th>Штрих-код</th>
-        <th>Группа</th>
-        <th>Дата создания</th>
-        <th>Показывать</th>
+        <th>Title</th>
+        <th>inriver code</th>
+        <th>Barcode</th>
+        
+       
         <th>QR код</th>
       </tr>
     </thead>
@@ -96,18 +114,17 @@
   <tr>
     <td><input type="checkbox" name="products" value="{{ product.id }}"></td>
     <td>{{ product.name }}</td>
+    <td>{{ product.external_id }}</td>
     <td>{{ product.barcode }}</td>
-    <td>{{ product.group }}</td>
-    <td>{{ product.created_at }}</td>
-    <td>{{ product.show_on_site }}</td>
+   
     <td>
   {% with  "qrcodes/"|add:product.name|add:".png" as png_path  %}
     {% if png_path|file_exists %}
       <a href="{% url 'download_qr' product.id %}" class="btn btn-sm btn-success">
-        📥 Скачать QR
+        📥 Download QR
       </a>
     {% else %}
-      <span class="text-muted">QR не сгенерирован</span>
+      <span class="text-muted">QR not generated</span>
     {% endif %}
   {% endwith %}
 </td>
@@ -118,15 +135,15 @@
 <div style="margin-top: 20px;">
   <div>
     {% if page_obj.has_previous %}
-      <a href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">⏪ Первая</a>
-      <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">◀️ Назад</a>
+      <a href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">⏪ first </a>
+      <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">◀️ Back</a>
     {% endif %}
 
-    <span>Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+    <span>Page {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
 
     {% if page_obj.has_next %}
-      <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">Вперёд ▶️</a>
-      <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">Последняя ⏩</a>
+      <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">Next ▶️</a>
+      <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">Last  ⏩</a>
     {% endif %}
   </div>
 </div>
@@ -143,7 +160,7 @@
   form.addEventListener("submit", function () {
     button.disabled = true;
     spinner.style.display = "inline-block";
-    button.innerText = "Загрузка...";
+    button.innerText = "Loading...";
   });
 </script>
 
