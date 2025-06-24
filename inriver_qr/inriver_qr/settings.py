@@ -28,7 +28,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'cg#p$g+j9tax!#a3cup@1$8obt2_+&k3q+pmu
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(os.environ.get('DJANGO_DEBUG', False))
 
-ALLOWED_HOSTS = ['*', 'esschertqrcodegenerator.herokuapp.com','127.0.0.1']
+ALLOWED_HOSTS = ['*', 'esschertqrcodegenerator-bbc56367d76f.herokuapp.com','127.0.0.1']
 
 CSRF_TRUSTED_ORIGINS = ['http://.*', 
                         
