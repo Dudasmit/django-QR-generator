@@ -223,10 +223,12 @@
       for (let checkbox of checkboxes) {
         checkbox.checked = source.checked;
       }
-      document.getElementById("select_all_flag").value = "1";
+      
       if (source.checked) {
+        document.getElementById("select_all_flag").value = "1";
         alert("ALL products on this page will be selected");
       } else {
+        document.getElementById("select_all_flag").value = "0";
         alert("Selection cleared");
       }
     }
